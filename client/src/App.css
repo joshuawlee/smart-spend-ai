@@ -1,38 +1,136 @@
-.App {
-  text-align: center;
+/* client/src/App.css */
+:root {
+  --primary: #2563eb;
+  --success: #10b981;
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* Sidebar | Main Content */
   min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 3rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 10px;
+}
+
+.nav-item {
+  padding: 1rem;
+  color: var(--text-light);
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+}
+
+.nav-item.active {
+  background-color: #eff6ff;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+  padding: 2.5rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.header p {
+  color: var(--text-light);
+}
+
+/* Stat Cards Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.stat-title {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.stat-trend {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.trend-up { color: var(--success); }
+.trend-down { color: #ef4444; }
+
+/* Chart Section */
+.chart-container {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn {
+  background-color: var(--primary);
   color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+  width: 100%;
+  margin-top: 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+.action-btn:hover {
+  background-color: #1d4ed8;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.action-btn:active {
+  transform: scale(0.98);
 }

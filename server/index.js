@@ -1,46 +1,71 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const fs = require('fs'); // Import File System module
+const path = require('path');
 
 const app = express();
-const PORT = 8000; // Node runs on port 5000
-const FLASK_URL = 'http://127.0.0.1:5001/predict'; // Python runs on 5001
+const PORT = 8000;
+const FLASK_URL = 'http://127.0.0.1:5001/predict';
 
-// Middleware
-app.use(cors()); // Allow Frontend requests
-app.use(express.json()); // specific helper to parse JSON data
+app.use(cors());
+app.use(express.json());
 
-// 1. Basic Health Check Route
-// This is just to test if the server works at all.
-app.get('/', (req, res) => {
-    res.send('API Gateway is running...');
-});
-
-// 2. The Main Route
-// The Frontend will call THIS URL, not the Python one directly.
-app.post('/api/forecast', async (req, res) => {
+// 1. NEW ROUTE: Get Spending History from "Database"
+app.get('/api/spending', (req, res) => {
     try {
-        // Get the data that React sent us
-        const userHistory = req.body.history;
-
-        console.log("➡️ Received request from Frontend. Forwarding to AI...");
-
-        // Send that data to the Python Microservice
-        const response = await axios.post(FLASK_URL, {
-            history: userHistory
-        });
-
-        // Send the Python answer back to the React Frontend
-        console.log("⬅️ Got answer from AI. Sending to Frontend.");
-        res.json(response.data);
-
+        // Read the JSON file
+        const dataPath = path.join(__dirname, 'data', 'spending.json');
+        const rawData = fs.readFileSync(dataPath);
+        const jsonData = JSON.parse(rawData);
+        
+        // Send it to frontend
+        res.json(jsonData.history);
     } catch (error) {
-        console.error("❌ Error:", error.message);
-        res.status(500).json({ error: "Failed to connect to AI Service" });
+        console.error("Error reading DB:", error);
+        res.status(500).json({ error: "Database error" });
     }
 });
 
-// Start the Server
+// 2. Updated Forecast Route (Uses data from Frontend)
+app.post('/api/forecast', async (req, res) => {
+    try {
+        const userHistory = req.body.history;
+        console.log("➡️ Forwarding to AI...");
+        const response = await axios.post(FLASK_URL, { history: userHistory });
+        res.json(response.data);
+    } catch (error) {
+        console.error("❌ AI Error:", error.message);
+        res.status(500).json({ error: "AI Service unavailable" });
+    }
+});
+
+// 3. Add a new spending amount (The "Create" in CRUD)
+app.post('/api/spending', (req, res) => {
+    try {
+        const { amount } = req.body;
+        
+        // 1. Read existing file
+        const dataPath = path.join(__dirname, 'data', 'spending.json');
+        const rawData = fs.readFileSync(dataPath);
+        const jsonData = JSON.parse(rawData);
+
+        // 2. Add new amount to the array
+        jsonData.history.push(Number(amount));
+
+        // 3. Save BACK to the file
+        fs.writeFileSync(dataPath, JSON.stringify(jsonData, null, 2));
+
+        // 4. Send back success
+        res.json({ success: true, history: jsonData.history });
+        console.log(`✅ Added new transaction: $${amount}`);
+
+    } catch (error) {
+        console.error("Error saving data:", error);
+        res.status(500).json({ error: "Failed to save data" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Node Gateway running on http://localhost:${PORT}`);
 });
