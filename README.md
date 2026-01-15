@@ -1,29 +1,23 @@
-# SmartSpend: AI-Powered Financial Forecasting Platform
+# 💳 SmartSpend AI
 
-## 🚀 Overview
-SmartSpend is a full-stack financial dashboard that goes beyond simple tracking. It utilizes a microservices architecture to integrate a **Machine Learning forecasting engine**, allowing users to visualize not just their past expenses, but their predicted future spending based on historical data trends.
+**SmartSpend AI** is a full-stack financial forecasting dashboard that uses Machine Learning to predict future spending habits based on transaction history.
 
-## 🏗 Architecture
-The application is built using a **Microservices** pattern:
-- **Frontend:** React.js with Chart.js for dynamic visualization.
-- **API Gateway:** Node.js & Express handling user authentication and CRUD operations.
-- **ML Service:** A dedicated Python (Flask) microservice that processes transaction data and runs linear regression models to forecast next-month expenses.
-- **Database:** MongoDB for transaction storage.
+## 🚀 Tech Stack (Microservices Architecture)
 
-## 🛠 Tech Stack
-- **Frontend:** React, Redux, Tailwind CSS, Chart.js
-- **Backend:** Node.js, Express, JWT Auth
-- **AI/ML:** Python, Flask, Scikit-Learn, Pandas, NumPy
-- **Database:** MongoDB Atlas
+* **Frontend:** React.js, Chart.js (Data Visualization)
+* **API Gateway:** Node.js, Express (Rest API)
+* **AI Engine:** Python, Flask, Scikit-Learn (Linear Regression)
+* **Data:** JSON Store (Persistence)
 
-## ⚡ Key Features
-- **Real-Time Dashboard:** Interactive graphs showing spending breakdown by category.
-- **Predictive Analytics:** ML-driven forecasting module that predicts upcoming bills/variable costs with ~85% accuracy.
-- **Secure Data Flow:** RESTful API communication between the Node.js gateway and the Python inference engine.
+## 🏗️ System Architecture
 
-## 🚧 Status
-*Current Version: v0.5 (Active Development)*
-- [x] Repository Setup & Architecture Design
-- [ ] React Frontend Implementation
-- [ ] Node.js API Gateway
-- [ ] Python ML Service Integration
+The application follows a decoupled microservices pattern to separate the User Interface, Business Logic, and Computation Engine.
+
+```mermaid
+graph TD;
+    User[👤 User] -->|Interacts| Client[⚛️ React Frontend];
+    Client -->|HTTP GET/POST| Gateway[🟢 Node.js API Gateway];
+    Gateway -->|Read/Write| DB[(📂 JSON Database)];
+    Gateway -->|Forward Data| AI[🐍 Python AI Service];
+    AI -->|Return Prediction| Gateway;
+    Gateway -->|Return JSON| Client;
