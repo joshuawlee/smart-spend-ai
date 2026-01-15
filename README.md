@@ -84,27 +84,24 @@ cd smart-spend-ai
 cd ml-service
 pip3 install flask flask-cors pandas scikit-learn
 python3 app.py
-```
 # 🧠 AI Service running on Port 5001
-
+```
 ### 3. Start the API Gateway (Node.js)
 Open a new terminal:
 ```bash
 cd server
 npm install
 node index.js
-```
 # 🚀 Gateway running on Port 8000
-
+```
 ### 4. Start the Frontend (React)
 Open a new terminal:
 ```bash
 cd client
 npm install
 npm start
-```
 # ⚛️ App opens at http://localhost:3000
-
+```
 ---
 
 ## 📡 API Endpoints
