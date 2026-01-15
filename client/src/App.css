@@ -1,31 +1,60 @@
-/* client/src/App.css */
+/* =========================================
+   1. GLOBAL VARIABLES (THEME ENGINE)
+   ========================================= */
 :root {
+  /* Light Mode (Default) */
   --primary: #2563eb;
-  --success: #10b981;
   --bg-color: #f3f4f6;
   --card-bg: #ffffff;
-  --text-dark: #1f2937;
-  --text-light: #6b7280;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --input-bg: #ffffff;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --success: #10b981;
+  --danger: #ef4444;
 }
 
+/* Dark Mode Overrides */
+[data-theme='dark'] {
+  --primary: #3b82f6;       /* Lighter blue for better contrast on dark */
+  --bg-color: #111827;      /* Deep charcoal background */
+  --card-bg: #1f2937;       /* Dark gray card background */
+  --text-main: #f9fafb;     /* White text */
+  --text-muted: #9ca3af;    /* Light gray text */
+  --border-color: #374151;  /* Dark border */
+  --input-bg: #374151;      /* Dark input fields */
+  --modal-overlay: rgba(0, 0, 0, 0.75); /* Darker dimming */
+}
+
+/* =========================================
+   2. BASE STYLES
+   ========================================= */
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-color);
-  color: var(--text-dark);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* =========================================
+   3. LAYOUT (SIDEBAR + MAIN)
+   ========================================= */
 .dashboard-container {
   display: grid;
-  grid-template-columns: 250px 1fr; /* Sidebar | Main Content */
+  grid-template-columns: 260px 1fr; /* Sidebar Width | Content */
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* Sidebar Styling */
 .sidebar {
   background-color: var(--card-bg);
   padding: 2rem;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .logo {
@@ -35,27 +64,40 @@ body {
   margin-bottom: 3rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .nav-item {
   padding: 1rem;
-  color: var(--text-light);
+  color: var(--text-muted);
   cursor: pointer;
   border-radius: 8px;
   margin-bottom: 0.5rem;
+  font-weight: 500;
   transition: all 0.2s;
 }
 
+.nav-item:hover {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
 .nav-item.active {
-  background-color: #eff6ff;
+  background-color: rgba(37, 99, 235, 0.1);
   color: var(--primary);
   font-weight: 600;
 }
 
-/* Main Content */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Main Content Area */
 .main-content {
   padding: 2.5rem;
+  overflow-y: auto; /* Allow scrolling */
 }
 
 .header {
@@ -63,15 +105,31 @@ body {
 }
 
 .header h2 {
-  font-size: 1.8rem;
   margin: 0;
+  font-size: 1.8rem;
+  color: var(--text-main);
 }
 
 .header p {
-  color: var(--text-light);
+  color: var(--text-muted);
+  margin-top: 5px;
 }
 
-/* Stat Cards Grid */
+/* =========================================
+   4. DASHBOARD COMPONENTS
+   ========================================= */
+
+/* Cards (Stats & Charts) */
+.stat-card, .chart-container {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Grid for Stats */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -79,58 +137,163 @@ body {
   margin-bottom: 2rem;
 }
 
-.stat-card {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
-}
-
 .stat-title {
-  color: var(--text-light);
+  color: var(--text-muted);
   font-size: 0.875rem;
+  font-weight: 500;
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .stat-trend {
   font-size: 0.875rem;
   margin-top: 0.5rem;
+  color: var(--text-muted);
 }
 
-.trend-up { color: var(--success); }
-.trend-down { color: #ef4444; }
+/* Tables */
+table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
 
-/* Chart Section */
-.chart-container {
-  background: var(--card-bg);
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+table td {
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   5. BUTTONS & INPUTS
+   ========================================= */
+.primary-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
 }
 
 .action-btn {
   background-color: var(--primary);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s;
+}
+
+/* =========================================
+   6. MODAL (POPUP) STYLES
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--modal-overlay);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 16px;
   width: 100%;
-  margin-top: 1rem;
+  max-width: 420px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
 }
 
-.action-btn:hover {
-  background-color: #1d4ed8;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
-.action-btn:active {
-  transform: scale(0.98);
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.close-btn:hover {
+  color: var(--text-main);
+}
+
+/* Form Styles inside Modal */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-main);
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
