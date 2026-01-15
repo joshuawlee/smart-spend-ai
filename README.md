@@ -7,12 +7,18 @@
 ## 📸 Project Screenshots
 
 ### 1. The Dashboard (Dark Mode)
+<img width="1470" height="801" alt="image" src="https://github.com/user-attachments/assets/f09ae376-0c41-48ff-965b-f0aee3874997" />
+
 > *Real-time financial tracking with AI-powered trend forecasting.*
 
 ### 2. Transaction Management (Modal)
+<img width="1470" height="801" alt="image" src="https://github.com/user-attachments/assets/92734bff-04ff-4361-965f-0fe61ef3b22a" />
+
 > *Clean, glassmorphism-styled forms for managing expenses.*
 
 ### 3. Data Visualization (Light Mode)
+<img width="442" height="407" alt="image" src="https://github.com/user-attachments/assets/183c8ef2-03a3-4a01-bde9-e7ad00d66064" />
+
 > *Dynamic charts showing spending breakdown by category.*
 
 ---
