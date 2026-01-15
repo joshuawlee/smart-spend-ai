@@ -1,68 +1,97 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const fs = require('fs'); // Import File System module
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 8000;
+const PORT = 8000; // Make sure this is 8000
 const FLASK_URL = 'http://127.0.0.1:5001/predict';
 
 app.use(cors());
 app.use(express.json());
 
-// 1. NEW ROUTE: Get Spending History from "Database"
+// Helper: Get Data Path
+const getDataPath = () => path.join(__dirname, 'data', 'spending.json');
+
+// 1. GET: Fetch all transactions
 app.get('/api/spending', (req, res) => {
     try {
-        // Read the JSON file
-        const dataPath = path.join(__dirname, 'data', 'spending.json');
-        const rawData = fs.readFileSync(dataPath);
+        const rawData = fs.readFileSync(getDataPath());
         const jsonData = JSON.parse(rawData);
         
-        // Send it to frontend
+        // Safety Sort: Ensure they are sorted when we read them too
+        jsonData.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
         res.json(jsonData.history);
     } catch (error) {
-        console.error("Error reading DB:", error);
         res.status(500).json({ error: "Database error" });
     }
 });
 
-// 2. Updated Forecast Route (Uses data from Frontend)
-app.post('/api/forecast', async (req, res) => {
+// 2. POST: Add new transaction (FIXED: Categories + Sorting)
+app.post('/api/spending', (req, res) => {
     try {
-        const userHistory = req.body.history;
-        console.log("➡️ Forwarding to AI...");
-        const response = await axios.post(FLASK_URL, { history: userHistory });
-        res.json(response.data);
+        // FIX 1: Explicitly get 'category' from the request
+        const { amount, date, category } = req.body;
+        
+        const rawData = fs.readFileSync(getDataPath());
+        const jsonData = JSON.parse(rawData);
+
+        // Create new object
+        const newTransaction = {
+            id: Date.now(),
+            amount: Number(amount),
+            date: date || new Date().toISOString().split('T')[0],
+            // FIX 1: Ensure category is saved, default to 'Other' if missing
+            category: category || "Other" 
+        };
+
+        jsonData.history.push(newTransaction);
+
+        // FIX 2: Sort Chronologically (Oldest -> Newest)
+        jsonData.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Save sorted data back to file
+        fs.writeFileSync(getDataPath(), JSON.stringify(jsonData, null, 2));
+
+        res.json({ success: true, history: jsonData.history });
+        console.log(`✅ Added: $${amount} for ${category} on ${newTransaction.date}`);
+
     } catch (error) {
-        console.error("❌ AI Error:", error.message);
-        res.status(500).json({ error: "AI Service unavailable" });
+        console.error("Save Error:", error);
+        res.status(500).json({ error: "Failed to save" });
     }
 });
 
-// 3. Add a new spending amount (The "Create" in CRUD)
-app.post('/api/spending', (req, res) => {
+// 3. DELETE: Remove transaction by ID
+app.delete('/api/spending/:id', (req, res) => {
     try {
-        const { amount } = req.body;
-        
-        // 1. Read existing file
-        const dataPath = path.join(__dirname, 'data', 'spending.json');
-        const rawData = fs.readFileSync(dataPath);
-        const jsonData = JSON.parse(rawData);
+        const { id } = req.params;
+        const rawData = fs.readFileSync(getDataPath());
+        let jsonData = JSON.parse(rawData);
 
-        // 2. Add new amount to the array
-        jsonData.history.push(Number(amount));
+        // Filter out the item
+        jsonData.history = jsonData.history.filter(item => item.id !== Number(id));
 
-        // 3. Save BACK to the file
-        fs.writeFileSync(dataPath, JSON.stringify(jsonData, null, 2));
-
-        // 4. Send back success
+        // Save
+        fs.writeFileSync(getDataPath(), JSON.stringify(jsonData, null, 2));
         res.json({ success: true, history: jsonData.history });
-        console.log(`✅ Added new transaction: $${amount}`);
 
     } catch (error) {
-        console.error("Error saving data:", error);
-        res.status(500).json({ error: "Failed to save data" });
+        res.status(500).json({ error: "Failed to delete" });
+    }
+});
+
+// 4. PREDICT: Forecast
+app.post('/api/forecast', async (req, res) => {
+    try {
+        const userHistory = req.body.history;
+        const plainNumbers = userHistory.map(item => item.amount);
+        const response = await axios.post(FLASK_URL, { history: plainNumbers });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: "AI Service unavailable" });
     }
 });
 
