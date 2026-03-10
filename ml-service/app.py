@@ -25,25 +25,29 @@ training_data = [
     ("chick-fil-a", "Food"), ("whataburger", "Food"), ("wingstop", "Food"),
     ("grocery", "Food"), ("market", "Food"), ("lunch", "Food"), ("dinner", "Food"),
     
-    # TRAVEL (Gas / Uber)
-    ("shell", "Travel"), ("exxon", "Travel"), ("chevron", "Travel"),
-    ("uber", "Travel"), ("lyft", "Travel"), ("texaco", "Travel"),
-    ("bp", "Travel"), ("united airlines", "Travel"), ("delta", "Travel"),
-    ("gas", "Travel"), ("flight", "Travel"), ("hotel", "Travel"),
-    ("fuel", "Travel"), ("pilot", "Travel"), ("american airlines", "Travel"),
-    ("wawa", "Travel"), ("buc-ee's", "Travel"), ("love's", "Travel"),
+    # TRANSPORTATION
+    ("shell", "Transportation"), ("exxon", "Transportation"), ("chevron", "Transportation"),
+    ("uber", "Transportation"), ("lyft", "Transportation"), ("texaco", "Transportation"),
+    ("bp", "Transportation"), ("united airlines", "Transportation"), ("delta", "Transportation"),
+    ("gas", "Transportation"), ("flight", "Transportation"), ("hotel", "Transportation"),
+    ("fuel", "Transportation"), ("pilot", "Transportation"), ("american airlines", "Transportation"),
+    ("wawa", "Transportation"), ("buc-ee's", "Transportation"), ("love's", "Transportation"),
     
-    # TECH
-    ("spotify", "Tech"), ("netflix", "Tech"), ("apple", "Tech"),
-    ("best buy", "Tech"), ("amazon", "Tech"), ("google", "Tech"),
-    ("aws", "Tech"), ("hulu", "Tech"), ("adobe", "Tech"),
-    ("playstation", "Tech"), ("xbox", "Tech"), ("nintendo", "Tech"),
-    ("steam", "Tech"), ("chatgpt", "Tech"), ("cursor", "Tech"),
+    # ENTERTAINMENT & SHOPPING
+    ("spotify", "Entertainment"), ("netflix", "Entertainment"), ("apple", "Shopping"),
+    ("best buy", "Shopping"), ("amazon", "Shopping"), ("google", "Entertainment"),
+    ("aws", "Entertainment"), ("hulu", "Entertainment"), ("adobe", "Entertainment"),
+    ("playstation", "Entertainment"), ("xbox", "Entertainment"), ("nintendo", "Entertainment"),
+    ("steam", "Entertainment"), ("chatgpt", "Entertainment"), ("cursor", "Entertainment"),
     
-    # RENT / BILLS
-    ("leasing office", "Rent"), ("apartments", "Rent"), ("rent", "Rent"),
-    ("electric", "Rent"), ("water", "Rent"), ("utilities", "Rent"),
-    ("wifi", "Rent"), ("internet", "Rent"), ("verizon", "Rent"), ("att", "Rent")
+    # HOUSING & UTILITIES
+    ("leasing office", "Housing"), ("apartments", "Housing"), ("rent", "Housing"),
+    ("electric", "Utilities"), ("water", "Utilities"), ("utilities", "Utilities"),
+    ("wifi", "Utilities"), ("internet", "Utilities"), ("verizon", "Utilities"), ("att", "Utilities"),
+    
+    # HEALTH
+    ("cvs", "Health"), ("walgreens", "Health"), ("pharmacy", "Health"),
+    ("hospital", "Health"), ("doctor", "Health"), ("dentist", "Health")
 ]
 
 # Build Model
@@ -104,6 +108,58 @@ def predict_spending():
     except Exception as e:
         print("Forecast Error:", e)
         return jsonify({'error': str(e), 'predicted_next_month': 0})
+
+@app.route('/generate_summary', methods=['POST'])
+def generate_summary():
+    try:
+        data = request.json
+        history = data.get('history', [])
+        
+        if not history or len(history) == 0:
+            return jsonify({
+                "summary": "You have no recorded transactions yet. Start adding some to get AI insights!",
+                "trend": "Stable",
+                "count": 0
+            })
+
+        df = pd.DataFrame(history)
+        
+        # Calculate some basic facts
+        total_spend = df['amount'].sum()
+        tx_count = len(df)
+        
+        # Find top category
+        if 'category' in df.columns:
+            top_cat = df.groupby('category')['amount'].sum().idxmax()
+            top_cat_amt = df.groupby('category')['amount'].sum().max()
+        else:
+            top_cat = "Unknown"
+            top_cat_amt = 0
+            
+        # VERY basic heuristics for summary generation (Mock LLM)
+        if total_spend > 5000:
+            summary = f"Your financial activity this period is unusually high. The majority of your spending went towards {top_cat} (${top_cat_amt:,.0f}). Consider reviewing these expenses."
+            trend = "High"
+        elif tx_count > 20:
+            summary = f"You've had a high volume of transactions ({tx_count}) recently, primarily driven by {top_cat}. Revenue shows expected seasonal variation."
+            trend = "Active"
+        else:
+            summary = f"Your financial activity remains stable with {tx_count} recent transactions. Spending is balanced, with {top_cat} being your top category. No unusual patterns detected."
+            trend = "Stable"
+            
+        return jsonify({
+            "summary": summary,
+            "trend": trend,
+            "count": tx_count
+        })
+
+    except Exception as e:
+        print("Summary Gen Error:", e)
+        return jsonify({
+            "summary": "Error analyzing your spending data.",
+            "trend": "Unknown",
+            "count": 0
+        })
 
 if __name__ == '__main__':
     app.run(port=5001)

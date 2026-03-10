@@ -12,6 +12,19 @@ model User {
   email        String        @unique
   password     String
   transactions Transaction[] // Relation: One user has many transactions
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id       Int      @id @default(autoincrement())
+  payee    String
+  amount   Float
+  date     DateTime @default(now())
+  dueDate  DateTime
+  status   String   @default("Pending") // Unpaid, Paid, Pending
+  
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
 }
 
 model Transaction {
